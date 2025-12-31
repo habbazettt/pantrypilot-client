@@ -34,10 +34,11 @@ import { RecipeCardSkeleton } from "@/components/recipe/recipe-skeletons"
 import { Badge } from "@/components/ui/badge"
 import { Toaster, toast } from "sonner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom"
+import { Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom"
 import { LoginPage } from "@/pages/auth/LoginPage"
 import { RegisterPage } from "@/pages/auth/RegisterPage"
 import { useAuthStore } from "@/store/authStore"
+import { useUIStore } from "@/store/uiStore"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,6 +54,7 @@ import { PublicRecipePage } from "@/pages/public/PublicRecipePage"
 import { ProfilePage } from "@/pages/profile/ProfilePage"
 import { AuroraBackground } from "@/components/ui/aurora-background"
 import { PageTransition } from "@/components/layout/page-transition"
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 
 const queryClient = new QueryClient()
 
@@ -108,6 +110,7 @@ function UserMenu() {
 }
 
 function Dashboard() {
+  const { setOnboardingOpen } = useUIStore();
   const [started, setStarted] = useState(false)
   const [ingredients, setIngredients] = useState<string[]>([])
   const [allergies, setAllergies] = useState<string[]>([])
@@ -200,268 +203,271 @@ function Dashboard() {
 
   if (!started) {
     return (
-      <main className="flex flex-col items-center justify-center min-h-[80vh] text-center p-4 relative z-10 animate-in fade-in zoom-in duration-500">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="max-w-3xl"
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent-foreground text-sm font-medium mb-6">
-            <Sparkles className="h-4 w-4" /> AI-Powered V1.0
-          </div>
-          <h1 className="text-6xl md:text-8xl font-bold tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/70">
-            Pantry<span className="text-primary">Pilot</span>
-          </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-10 leading-relaxed max-w-2xl mx-auto">
-            Transform your leftover ingredients into culinary masterpieces.
-            Smart recipes, zero waste.
-          </p>
-
+      <div className="w-full h-full overflow-y-auto">
+        <main className="flex flex-col items-center justify-center min-h-[80vh] text-center p-4 relative z-10 animate-in fade-in zoom-in duration-500">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="max-w-3xl"
           >
-            <Button size="lg" onClick={() => setStarted(true)} className="rounded-full h-14 px-8 text-lg shadow-xl shadow-primary/20 hover:scale-105 transition-all duration-300">
-              Start Cooking <ChevronRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button size="lg" variant="outline" className="rounded-full h-14 px-8 text-lg border-2 hover:bg-secondary/50">
-              How it Works
-            </Button>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent-foreground text-sm font-medium mb-6">
+              <Sparkles className="h-4 w-4" /> AI-Powered V1.0
+            </div>
+            <h1 className="text-6xl md:text-8xl font-bold tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/70">
+              Pantry<span className="text-primary">Pilot</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-muted-foreground mb-10 leading-relaxed max-w-2xl mx-auto">
+              Transform your leftover ingredients into culinary masterpieces.
+              Smart recipes, zero waste.
+            </p>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+            >
+              <Button size="lg" onClick={() => setStarted(true)} className="rounded-full h-14 px-8 text-lg shadow-xl shadow-primary/20 hover:scale-105 transition-all duration-300">
+                Start Cooking <ChevronRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => setOnboardingOpen(true)} className="rounded-full h-14 px-8 text-lg border-2 hover:bg-secondary/50">
+                How it Works
+              </Button>
+            </motion.div>
           </motion.div>
-        </motion.div>
-        <OnboardingDialog />
-      </main>
+        </main>
+      </div>
     )
   }
 
   return (
-    <main className="container max-w-5xl mx-auto p-4 md:p-8 min-h-[90vh] flex flex-col">
-      <div className="flex flex-col flex-grow">
+    <div className="w-full h-full overflow-y-auto">
+      <main className="container max-w-5xl mx-auto p-4 md:p-8 min-h-[90vh] flex flex-col">
+        <div className="flex flex-col flex-grow">
 
-        <div className="flex items-center justify-between mb-8">
-          <Button variant="ghost" size="sm" className="-ml-4 hover:bg-transparent hover:text-primary" onClick={() => !generateMutation.data ? setStarted(false) : handleBack()}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            {generateMutation.data ? "New Search" : "Back Home"}
-          </Button>
+          <div className="flex items-center justify-between mb-8">
+            <Button variant="ghost" size="sm" className="-ml-4 hover:bg-transparent hover:text-primary" onClick={() => !generateMutation.data ? setStarted(false) : handleBack()}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              {generateMutation.data ? "New Search" : "Back Home"}
+            </Button>
 
-          {!generateMutation.data && <h2 className="text-2xl font-bold tracking-tight">Recipe Configuration</h2>}
-        </div>
+            {!generateMutation.data && <h2 className="text-2xl font-bold tracking-tight">Recipe Configuration</h2>}
+          </div>
 
-        <AnimatePresence mode="wait">
-          {!generateMutation.data ? (
-            <motion.div
-              key="input-section"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="flex flex-col items-center justify-center flex-grow max-w-3xl mx-auto w-full"
-            >
-              <div className="w-full glass rounded-3xl p-6 md:p-10 shadow-2xl grid md:grid-cols-2 gap-8 relative overflow-hidden">
-                {/* Shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
-                {/* Ingredients & Filters Form */}
-                <div className="col-span-2 md:col-span-1 space-y-6">
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2 flex items-center gap-2"><div className="h-6 w-1 bg-primary rounded-full" /> Ingredients</h3>
-                    <p className="text-sm text-muted-foreground mb-4">What's in your pantry?</p>
-                    <TagInput
-                      tags={ingredients}
-                      onChange={setIngredients}
-                      placeholder="Add ingredient..."
-                      emptyMessage="Start by adding ingredients like chicken, rice, eggs..."
-                    />
+          <AnimatePresence mode="wait">
+            {!generateMutation.data ? (
+              <motion.div
+                key="input-section"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="flex flex-col items-center justify-center flex-grow max-w-3xl mx-auto w-full"
+              >
+                <div className="w-full glass rounded-3xl p-6 md:p-10 shadow-2xl grid md:grid-cols-2 gap-8 relative overflow-hidden">
+                  {/* Shine effect */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
+                  {/* Ingredients & Filters Form */}
+                  <div className="col-span-2 md:col-span-1 space-y-6">
+                    <div>
+                      <h3 className="text-xl font-semibold mb-2 flex items-center gap-2"><div className="h-6 w-1 bg-primary rounded-full" /> Ingredients</h3>
+                      <p className="text-sm text-muted-foreground mb-4">What's in your pantry?</p>
+                      <TagInput
+                        tags={ingredients}
+                        onChange={setIngredients}
+                        placeholder="Add ingredient..."
+                        emptyMessage="Start by adding ingredients like chicken, rice, eggs..."
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">Dietary Restrictions</h3>
+                      <p className="text-sm text-muted-foreground mb-2">Any allergies?</p>
+                      <TagInput
+                        tags={allergies}
+                        onChange={setAllergies}
+                        placeholder="Add allergy (e.g. peanuts)..."
+                        emptyMessage="No allergies specified."
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Dietary Restrictions</h3>
-                    <p className="text-sm text-muted-foreground mb-2">Any allergies?</p>
-                    <TagInput
-                      tags={allergies}
-                      onChange={setAllergies}
-                      placeholder="Add allergy (e.g. peanuts)..."
-                      emptyMessage="No allergies specified."
-                    />
-                  </div>
-                </div>
 
-                <div className="col-span-2 md:col-span-1 space-y-6">
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2">Preferences</h3>
-                    <p className="text-sm text-muted-foreground mb-4">Customize your meal.</p>
+                  <div className="col-span-2 md:col-span-1 space-y-6">
+                    <div>
+                      <h3 className="text-xl font-semibold mb-2">Preferences</h3>
+                      <p className="text-sm text-muted-foreground mb-4">Customize your meal.</p>
 
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium mb-1.5 block">Cooking Time</label>
-                        <div className="flex items-center gap-4">
-                          <Slider
-                            value={maxTime}
-                            onValueChange={setMaxTime}
-                            max={180}
-                            step={5}
-                            className="flex-1"
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium mb-1.5 block">Cooking Time</label>
+                          <div className="flex items-center gap-4">
+                            <Slider
+                              value={maxTime}
+                              onValueChange={setMaxTime}
+                              max={180}
+                              step={5}
+                              className="flex-1"
+                            />
+                            <span className="text-sm font-mono w-16 text-right">{maxTime[0]}m</span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-sm font-medium mb-1.5 block">Difficulty</label>
+                          <Select value={difficulty} onValueChange={setDifficulty}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select difficulty" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="any">Any Difficulty</SelectItem>
+                              <SelectItem value="easy">Easy</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="hard">Hard</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <label className="text-sm font-medium mb-1.5 block">Cuisine Style</label>
+                          <Select value={cuisine} onValueChange={setCuisine}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select cuisine" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="any">Any Cuisine</SelectItem>
+                              {cuisines?.map((c) => (
+                                <SelectItem key={c} value={c}>
+                                  {c.charAt(0).toUpperCase() + c.slice(1).replace('_', ' ')}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Other Preferences</label>
+                          <TagInput
+                            tags={preferences}
+                            onChange={setPreferences}
+                            placeholder="e.g. Low Carb, Keto..."
+                            emptyMessage="No specific preferences."
                           />
-                          <span className="text-sm font-mono w-16 text-right">{maxTime[0]}m</span>
                         </div>
                       </div>
-
-                      <div>
-                        <label className="text-sm font-medium mb-1.5 block">Difficulty</label>
-                        <Select value={difficulty} onValueChange={setDifficulty}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select difficulty" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="any">Any Difficulty</SelectItem>
-                            <SelectItem value="easy">Easy</SelectItem>
-                            <SelectItem value="medium">Medium</SelectItem>
-                            <SelectItem value="hard">Hard</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <label className="text-sm font-medium mb-1.5 block">Cuisine Style</label>
-                        <Select value={cuisine} onValueChange={setCuisine}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select cuisine" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="any">Any Cuisine</SelectItem>
-                            {cuisines?.map((c) => (
-                              <SelectItem key={c} value={c}>
-                                {c.charAt(0).toUpperCase() + c.slice(1).replace('_', ' ')}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <label className="text-sm font-medium mb-2 block">Other Preferences</label>
-                        <TagInput
-                          tags={preferences}
-                          onChange={setPreferences}
-                          placeholder="e.g. Low Carb, Keto..."
-                          emptyMessage="No specific preferences."
-                        />
-                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="col-span-2 pt-4">
-                  <Button
-                    size="lg"
-                    className="w-full h-14 text-lg rounded-xl shadow-lg shadow-primary/20"
-                    onClick={handleGenerate}
-                    disabled={ingredients.length === 0 || generateMutation.isPending}
-                  >
-                    {generateMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Chef is thinking...
-                      </>
-                    ) : (
-                      <>
-                        Generate Custom Recipes <Sparkles className="ml-2 h-5 w-5" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-
-                {generateMutation.isError && (
-                  <div className="col-span-2 flex items-center justify-center gap-2 text-destructive bg-destructive/10 p-3 rounded-lg text-sm">
-                    <AlertCircle className="h-5 w-5" />
-                    <p className="font-medium">{(generateMutation.error as Error).message}</p>
+                  <div className="col-span-2 pt-4">
+                    <Button
+                      size="lg"
+                      className="w-full h-14 text-lg rounded-xl shadow-lg shadow-primary/20"
+                      onClick={handleGenerate}
+                      disabled={ingredients.length === 0 || generateMutation.isPending}
+                    >
+                      {generateMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Chef is thinking...
+                        </>
+                      ) : (
+                        <>
+                          Generate Custom Recipes <Sparkles className="ml-2 h-5 w-5" />
+                        </>
+                      )}
+                    </Button>
                   </div>
-                )}
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="results-section"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="w-full"
-            >
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-2xl font-bold">{activeTab === 'recommended' ? 'Your Custom Menu' : activeTab === 'alternatives' ? 'Smart Substitutes' : 'Explore Recipes'}</h3>
-                    {activeTab !== 'search' && (
-                      <div className="flex gap-2 text-sm text-muted-foreground mt-1">
-                        <Badge variant="outline">{ingredients.length} ingredients</Badge>
-                        {difficulty !== "any" && <Badge variant="outline">{difficulty}</Badge>}
-                        <Badge variant="outline">Max {maxTime[0]}m</Badge>
-                      </div>
-                    )}
-                  </div>
-                  <TabsList>
-                    <TabsTrigger value="recommended">Recommended</TabsTrigger>
-                    <TabsTrigger value="alternatives">Alternatives</TabsTrigger>
-                    <TabsTrigger value="search" className="gap-2"><Search className="h-4 w-4" /> Explore</TabsTrigger>
-                  </TabsList>
-                </div>
 
-                <TabsContent value="recommended" className="mt-0">
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {generateMutation.data.recipes.map((recipe, idx) => (
-                      <RecipeCard
-                        key={recipe.id || idx}
-                        recipe={recipe}
-                        index={idx}
-                        isSaved={savedIds.has(recipe.id)}
-                        onSave={handleSaveToggle}
-                      />
-                    ))}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="alternatives" className="mt-0">
-                  {isLoadingAlternatives ? (
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {Array.from({ length: 6 }).map((_, i) => (
-                        <RecipeCardSkeleton key={i} />
-                      ))}
+                  {generateMutation.isError && (
+                    <div className="col-span-2 flex items-center justify-center gap-2 text-destructive bg-destructive/10 p-3 rounded-lg text-sm">
+                      <AlertCircle className="h-5 w-5" />
+                      <p className="font-medium">{(generateMutation.error as Error).message}</p>
                     </div>
-                  ) : (
+                  )}
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="results-section"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full"
+              >
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-2xl font-bold">{activeTab === 'recommended' ? 'Your Custom Menu' : activeTab === 'alternatives' ? 'Smart Substitutes' : 'Explore Recipes'}</h3>
+                      {activeTab !== 'search' && (
+                        <div className="flex gap-2 text-sm text-muted-foreground mt-1">
+                          <Badge variant="outline">{ingredients.length} ingredients</Badge>
+                          {difficulty !== "any" && <Badge variant="outline">{difficulty}</Badge>}
+                          <Badge variant="outline">Max {maxTime[0]}m</Badge>
+                        </div>
+                      )}
+                    </div>
+                    <TabsList>
+                      <TabsTrigger value="recommended">Recommended</TabsTrigger>
+                      <TabsTrigger value="alternatives">Alternatives</TabsTrigger>
+                      <TabsTrigger value="search" className="gap-2"><Search className="h-4 w-4" /> Explore</TabsTrigger>
+                    </TabsList>
+                  </div>
+
+                  <TabsContent value="recommended" className="mt-0">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {alternativesData?.flatMap(group => group.recipes).map((recipe, idx) => (
+                      {generateMutation.data.recipes.map((recipe, idx) => (
                         <RecipeCard
-                          key={recipe.id || `alt-${idx}`}
+                          key={recipe.id || idx}
                           recipe={recipe}
                           index={idx}
                           isSaved={savedIds.has(recipe.id)}
                           onSave={handleSaveToggle}
                         />
                       ))}
-                      {(!alternativesData || alternativesData.length === 0) && (
-                        <div className="col-span-full text-center py-12 text-muted-foreground">
-                          <p>No specific alternatives found. Try adjusting your preferences.</p>
-                        </div>
-                      )}
                     </div>
-                  )}
-                </TabsContent>
+                  </TabsContent>
 
-                <TabsContent value="search" className="mt-0">
-                  <SearchView />
-                </TabsContent>
-              </Tabs>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                  <TabsContent value="alternatives" className="mt-0">
+                    {isLoadingAlternatives ? (
+                      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <RecipeCardSkeleton key={i} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {alternativesData?.flatMap(group => group.recipes).map((recipe, idx) => (
+                          <RecipeCard
+                            key={recipe.id || `alt-${idx}`}
+                            recipe={recipe}
+                            index={idx}
+                            isSaved={savedIds.has(recipe.id)}
+                            onSave={handleSaveToggle}
+                          />
+                        ))}
+                        {(!alternativesData || alternativesData.length === 0) && (
+                          <div className="col-span-full text-center py-12 text-muted-foreground">
+                            <p>No specific alternatives found. Try adjusting your preferences.</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </TabsContent>
 
-      </div>
-      <OnboardingDialog />
-    </main>
+                  <TabsContent value="search" className="mt-0">
+                    <SearchView />
+                  </TabsContent>
+                </Tabs>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+        </div>
+      </main>
+    </div>
   )
 }
 
 function LandingPage() {
   const navigate = useNavigate();
+  const { setOnboardingOpen } = useUIStore();
 
   return (
     <main className="flex flex-col items-center justify-center h-full text-center p-4 relative z-10 animate-in fade-in zoom-in duration-500">
@@ -491,7 +497,7 @@ function LandingPage() {
           <Button size="lg" onClick={() => navigate('/login')} className="rounded-full h-14 px-8 text-lg shadow-xl shadow-primary/20 hover:scale-105 transition-all duration-300">
             Start Cooking <ChevronRight className="ml-2 h-5 w-5" />
           </Button>
-          <Button size="lg" variant="outline" className="rounded-full h-14 px-8 text-lg border-2 hover:bg-secondary/50">
+          <Button size="lg" variant="outline" onClick={() => setOnboardingOpen(true)} className="rounded-full h-14 px-8 text-lg border-2 hover:bg-secondary/50">
             How it Works
           </Button>
         </motion.div>
@@ -521,7 +527,10 @@ function Layout({ children }: { children: React.ReactNode }) {
 
       <div className="h-20" /> {/* Spacer for fixed header */}
 
-      {children}
+      <div className="flex-1 overflow-y-auto scroll-smooth">
+        {children}
+        <OnboardingDialog />
+      </div>
 
       {/* Background Ambient Effects - FALLBACK if Aurora is not used or needed here */}
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
@@ -538,7 +547,11 @@ function HomePage() {
 
   // If logged in, show Dashboard. Otherwise, show Landing Page.
   if (user) {
-    return <Dashboard />;
+    return (
+      <AuroraBackground className="h-[calc(100vh-5rem)] !items-start !justify-start">
+        <Dashboard />
+      </AuroraBackground>
+    );
   }
 
   return (
@@ -579,10 +592,13 @@ function AppContent() {
           </PageTransition>
         } />
         <Route path="/profile" element={
-          <PageTransition>
-            <ProfilePage />
-          </PageTransition>
+          <ProtectedRoute>
+            <PageTransition>
+              <ProfilePage />
+            </PageTransition>
+          </ProtectedRoute>
         } />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>
   )

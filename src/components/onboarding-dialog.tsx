@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import {
     Dialog,
     DialogContent,
@@ -10,9 +10,10 @@ import {
 import { Button } from "@/components/ui/button"
 import { Sparkles, Search, Heart, Share2 } from "lucide-react"
 import { useAuthStore } from "@/store/authStore"
+import { useUIStore } from "@/store/uiStore"
 
 export function OnboardingDialog() {
-    const [open, setOpen] = useState(false)
+    const { isOnboardingOpen, setOnboardingOpen } = useUIStore()
     const { user } = useAuthStore()
 
     useEffect(() => {
@@ -21,19 +22,21 @@ export function OnboardingDialog() {
             const hasSeen = localStorage.getItem("pantrypilot-onboarding-seen")
             if (!hasSeen) {
                 // Small delay to not overwhelm
-                const timer = setTimeout(() => setOpen(true), 1500)
+                const timer = setTimeout(() => setOnboardingOpen(true), 1500)
                 return () => clearTimeout(timer)
             }
         }
-    }, [user])
+    }, [user, setOnboardingOpen])
 
     const handleClose = () => {
-        setOpen(false)
-        localStorage.setItem("pantrypilot-onboarding-seen", "true")
+        setOnboardingOpen(false)
+        if (user) {
+            localStorage.setItem("pantrypilot-onboarding-seen", "true")
+        }
     }
 
     return (
-        <Dialog open={open} onOpenChange={handleClose}>
+        <Dialog open={isOnboardingOpen} onOpenChange={handleClose}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-xl">

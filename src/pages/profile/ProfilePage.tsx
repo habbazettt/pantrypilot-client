@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/authStore";
-import { updateProfile } from "@/services/auth";
+import { updateProfile, getProfile } from "@/services/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,19 @@ import { ArrowLeft, User, Lock, Calendar, Mail, Save, Loader2 } from "lucide-rea
 export function ProfilePage() {
     const navigate = useNavigate();
     const { user, setUser } = useAuthStore();
+
+    // Fetch fresh profile data on mount to ensure we have latest fields (like createdAt)
+    useEffect(() => {
+        const loadProfile = async () => {
+            try {
+                const freshUser = await getProfile();
+                setUser(freshUser);
+            } catch (error) {
+                console.error("Failed to refresh profile", error);
+            }
+        };
+        loadProfile();
+    }, [setUser]);
 
     const [name, setName] = useState(user?.name || "");
     const [currentPassword, setCurrentPassword] = useState("");
@@ -75,11 +88,7 @@ export function ProfilePage() {
         return null;
     }
 
-    const memberSince = new Date(user.createdAt).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-    });
+
 
     return (
         <div className="container mx-auto py-8 px-4 max-w-2xl">
@@ -111,7 +120,11 @@ export function ProfilePage() {
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <Calendar className="h-4 w-4" />
-                            <span>Member since {memberSince}</span>
+                            <span>Member since {user.createdAt ? new Date(user.createdAt).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric"
+                            }) : '...'}</span>
                         </div>
                     </CardContent>
                 </Card>
