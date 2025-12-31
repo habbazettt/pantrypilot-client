@@ -50,6 +50,7 @@ import {
 import { SavedRecipesSheet } from "@/components/recipe/saved-recipes-sheet"
 import { SearchView } from "@/components/recipe/search-view"
 import { PublicRecipePage } from "@/pages/public/PublicRecipePage"
+import { ProfilePage } from "@/pages/profile/ProfilePage"
 import { AuroraBackground } from "@/components/ui/aurora-background"
 import { PageTransition } from "@/components/layout/page-transition"
 
@@ -93,6 +94,10 @@ function UserMenu() {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate('/profile')}>
+          <UserIcon className="mr-2 h-4 w-4" />
+          Profile Settings
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => logout()}>
           <LogOut className="mr-2 h-4 w-4" />
           Log out
@@ -571,6 +576,11 @@ function AppContent() {
         <Route path="/r/:shareId" element={
           <PageTransition>
             <PublicRecipePage />
+          </PageTransition>
+        } />
+        <Route path="/profile" element={
+          <PageTransition>
+            <ProfilePage />
           </PageTransition>
         } />
       </Routes>

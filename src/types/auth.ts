@@ -27,4 +27,11 @@ export interface AuthState {
     isAuthenticated: boolean;
     login: (token: string, user: User) => void;
     logout: () => void;
+    setUser: (user: User) => void;
+}
+
+export interface UpdateProfileDto {
+    name?: string;
+    currentPassword?: string;
+    newPassword?: string;
 }

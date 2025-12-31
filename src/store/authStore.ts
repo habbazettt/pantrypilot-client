@@ -18,6 +18,7 @@ export const useAuthStore = create<AuthStore>()(
                 set({ user: null, token: null, isAuthenticated: false });
                 localStorage.removeItem('pantrypilot_session'); // Clear legacy session too
             },
+            setUser: (user) => set({ user }),
             setAuth: (token, user) => set({ token, user, isAuthenticated: true }),
             clearAuth: () => set({ user: null, token: null, isAuthenticated: false }),
         }),
